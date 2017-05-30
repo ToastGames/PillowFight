@@ -18,7 +18,9 @@ public class PlayerController : MonoBehaviour {
 	public float playerStandUpTime = 1.0f;
 	public float standUpSpeed = 2.0f;
 	public float groundingSpeed = 2.0f;
+	public float attackForceMultiplier;
 
+	//private SphereCollider faceZone;
 	private Rigidbody rb;
 	private Vector3 previousRotationDirection = Vector3.forward;
 	private Vector3 resetPos;
@@ -28,6 +30,7 @@ public class PlayerController : MonoBehaviour {
 	private bool attackStarted = false;
 	private bool standingStarted = false;
 	private bool canAttackAgain = true;
+
 
 	void Start ()
 	{
@@ -60,8 +63,9 @@ public class PlayerController : MonoBehaviour {
 //			canAttackAgain = true;
 
 		AttackCooldown ();
-
 		UpdatePlayerGuide ();
+
+		//CheckHit ();
 
 		// reset player if back pressed
 		if (XCI.GetButton(XboxButton.Back , controller) == true)
@@ -175,11 +179,26 @@ public class PlayerController : MonoBehaviour {
 	}
 
 
+
 	private void ResetPlayer()
 	{
 		transform.position = resetPos;
 		transform.rotation = resetRot;
 		rb.velocity = Vector3.zero;
 		rb.angularVelocity = Vector3.zero;
+	}
+
+
+
+	//	This function and pretty much ALL calculations associated with it are fucked beyond belief... this code needs cleaning up like crazy... maybe even a revert
+
+	void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.tag == "Pillow") {
+			if (other.transform.parent.parent.gameObject != gameObject) {
+				Vector3 tempVec = (transform.position - other.transform.parent.parent.transform.position);
+				rb.AddForce (tempVec * attackForceMultiplier, ForceMode.Impulse);
+			}
+		}
 	}
 }
